@@ -11,7 +11,7 @@ namespace InvSee
 	[ApiVersion(2, 1)]
 	public class PMain : TerrariaPlugin
 	{
-		public override string Author => "Enerdy";
+		public override string Author => "Enerdy, few fixes by Anzhelika";
 
 		public override string Description => "Utilizes SSC technology to temporarily copy a player's inventory.";
 
@@ -19,7 +19,7 @@ namespace InvSee
 
 		public override Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 
-		public static string Tag => TShock.Utils.ColorTag("InvSee:", Color.Teal);
+		public static string Tag => TShock.Utils.ColorTag("InvSee: ", Color.Teal);
 
 		public PMain(Main game) : base(game)
 		{
@@ -81,6 +81,15 @@ namespace InvSee
 				PlayerInfo info = player.GetPlayerInfo();
 				info.Restore(player);
 			}
+            foreach (TSPlayer plr in TShock.Players)
+            {
+                if ((plr == null) || !plr.Active || !plr.ContainsData(PlayerInfo.KEY))
+                { continue; }
+
+                PlayerInfo info = plr.GetPlayerInfo();
+                if (info.CopyingPlayerIndex == e.Who)
+                { info.CopyingPlayerIndex = -1; }
+            }
 		}
 
 		void OnLogout(PlayerLogoutEventArgs e)
