@@ -11,8 +11,9 @@ namespace InvSee
 	internal class Commands
 	{
 		private static readonly string _cp = TShockAPI.Commands.Specifier;
+        #region DoInvSee
 
-		public static void DoInvSee(CommandArgs args)
+        public static void DoInvSee(CommandArgs args)
 		{
 			if (!Main.ServerSideCharacter)
 			{
@@ -42,6 +43,7 @@ namespace InvSee
             Copy(args, info);
 		}
 
+        #endregion
         #region Restore
 
         private static void Restore(CommandArgs args, PlayerInfo info)
@@ -80,48 +82,18 @@ namespace InvSee
             }
 
             #endregion
-            User user;
-            List<TSPlayer> players = new List<TSPlayer>();
-            #region GetUserAndPlayers
+            #region User
 
             if (info.CopyingUserID != -1)
             {
-                user = TShock.Users.GetUserByID(info.CopyingUserID);
+                User user = TShock.Users.GetUserByID(info.CopyingUserID);
                 if (user == null)
                 {
                     args.Player.PluginErrorMessage("Invalid user!");
                     return;
                 }
-                players = TShock.Players.Where(p => ((p?.User != null)
-                    && p.Active && (p.User.ID == user.ID))).ToList();
-                args.Player.PluginInfoMessage($"Saved changes made to {user.Name}'s inventory.");
-            }
-            else
-            {
-                TSPlayer player = TShock.Players.ElementAtOrDefault(info.CopyingPlayerIndex);
-                if (player == null)
-                {
-                    args.Player.PluginErrorMessage("Invalid player!");
-                    return;
-                }
-                user = player.User;
-                players = ((user == null)
-                            ? new List<TSPlayer>() { player }
-                            : TShock.Players.Where(p => ((p != null)
-                               && p.Active && ((p.Index == player.Index)
-                             || ((p.User?.ID ?? -1) == user.ID)))).ToList());
-                TShock.Log.ConsoleInfo($"[Player change] {args.Player.Name} " +
-                    $"has modified {player.Name}'s inventory.");
-                args.Player.PluginInfoMessage($"Saved changes made to {player.Name}'s inventory.");
-            }
-
-            #endregion
-            // We copy our character to make sure inventory is up to date before sending it.
-            args.Player.PlayerData.CopyCharacter(args.Player);
-            #region UpdateDatabase
-
-            if (user != null)
-            {
+                // We copy our character to make sure inventory is up to date before sending it.
+                args.Player.PlayerData.CopyCharacter(args.Player);
                 try
                 {
                     // Only replace inventory, ignore character looks.
@@ -135,7 +107,8 @@ namespace InvSee
                         playerData.mana, playerData.maxMana, string.Join("~", playerData.inventory),
                         info.CopyingUserID);
                     TShock.Log.ConsoleInfo($"[User change] {args.Player.Name} " +
-                        $"has modified {user.Name}'s ({user.ID}) inventory.");
+                        $"has modified {user.Name}'s inventory.");
+                    args.Player.PluginInfoMessage($"Saved changes made to {user.Name}'s inventory.");
                 }
                 catch (Exception ex)
                 {
@@ -146,8 +119,24 @@ namespace InvSee
             }
 
             #endregion
-            foreach (TSPlayer plr in players)
-            { args.Player.PlayerData.RestoreCharacter(plr); }
+            #region Player
+
+            else
+            {
+                TSPlayer player = TShock.Players.ElementAtOrDefault(info.CopyingPlayerIndex);
+                if (player == null)
+                {
+                    args.Player.PluginErrorMessage("Invalid player!");
+                    return;
+                }
+                args.Player.PlayerData.CopyCharacter(args.Player);
+                args.Player.PlayerData.RestoreCharacter(player);
+                TShock.Log.ConsoleInfo($"[Player change] {args.Player.Name} " +
+                    $"has modified {player.Name}'s inventory.");
+                args.Player.PluginInfoMessage($"Saved changes made to {player.Name}'s inventory.");
+            }
+
+            #endregion
         }
 
         #endregion
@@ -155,11 +144,10 @@ namespace InvSee
 
         private static void Copy(CommandArgs args, PlayerInfo info)
         {
-            string copyName = string.Join(" ", args.Parameters);
+            string name = string.Join(" ", args.Parameters);
             PlayerData data;
             int userID = -1, playerIndex = -1;
-            List<TSPlayer> players = TShock.Utils.FindPlayer(copyName);
-            string name;
+            List<TSPlayer> players = TShock.Utils.FindPlayer(name);
             #region User
 
             if (players.Count == 0)
@@ -170,10 +158,10 @@ namespace InvSee
                     return;
                 }
 
-                User user = TShock.Users.GetUserByName(copyName);
+                User user = TShock.Users.GetUserByName(name);
                 if (user == null)
                 {
-                    args.Player.PluginErrorMessage($"Invalid player or account '{copyName}'!");
+                    args.Player.PluginErrorMessage($"Invalid player or account '{name}'!");
                     return;
                 }
                 else
