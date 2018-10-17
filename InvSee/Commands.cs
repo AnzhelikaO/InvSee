@@ -1,33 +1,34 @@
-﻿using System;
+﻿#region Using
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using InvSee.Extensions;
 using Terraria;
 using TShockAPI;
 using TShockAPI.DB;
-
+#endregion
 namespace InvSee
 {
-	internal class Commands
-	{
-		private static readonly string _cp = TShockAPI.Commands.Specifier;
+    internal class Commands
+    {
+        private static readonly string _cp = TShockAPI.Commands.Specifier;
         #region DoInvSee
 
         public static void DoInvSee(CommandArgs args)
-		{
-			if (!Main.ServerSideCharacter)
-			{
-				args.Player.PluginErrorMessage("ServerSideCharacters must be enabled.");
-				return;
-			}
-			PlayerInfo info = args.Player.GetPlayerInfo();
+        {
+            if (!Main.ServerSideCharacter)
+            {
+                args.Player.PluginErrorMessage("ServerSideCharacters must be enabled.");
+                return;
+            }
+            PlayerInfo info = args.Player.GetPlayerInfo();
             #region Restore
 
             if (args.Parameters.Count < 1)
-			{
+            {
                 Restore(args, info);
                 return;
-			}
+            }
 
             #endregion
             #region Save
@@ -41,7 +42,7 @@ namespace InvSee
 
             #endregion
             Copy(args, info);
-		}
+        }
 
         #endregion
         #region Restore
@@ -100,9 +101,9 @@ namespace InvSee
                     PlayerData playerData = args.Player.PlayerData;
 
                     string query = @"UPDATE tsCharacter
-									 SET Health = @0, MaxHealth = @1, Mana = @2, MaxMana = @3,
-										 Inventory = @4
-									 WHERE Account = @5;";
+                                     SET Health = @0, MaxHealth = @1, Mana = @2, MaxMana = @3,
+                                         Inventory = @4
+                                     WHERE Account = @5;";
                     TShock.CharacterDB.database.Query(query, playerData.health, playerData.maxHealth,
                         playerData.mana, playerData.maxMana, string.Join("~", playerData.inventory),
                         info.CopyingUserID);
