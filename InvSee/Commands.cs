@@ -145,6 +145,9 @@ namespace InvSee
 
         private static void Copy(CommandArgs args, PlayerInfo info)
         {
+            if (args.Player.PlayerData == null)
+            { args.Player.PlayerData = new PlayerData(args.Player); }
+
             string name = string.Join(" ", args.Parameters);
             PlayerData data;
             int userID = -1, playerIndex = -1;
@@ -183,6 +186,8 @@ namespace InvSee
             }
             else
             {
+                if (players[0].PlayerData == null)
+                { players[0].PlayerData = new PlayerData(players[0]); }
                 players[0].PlayerData.CopyCharacter(players[0]);
                 data = players[0].PlayerData;
                 playerIndex = players[0].Index;
