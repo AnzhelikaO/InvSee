@@ -83,7 +83,7 @@ namespace InvSee
 			if (player != null)
 			{
 				PlayerInfo info = player.GetPlayerInfo();
-				info.Restore(player);
+				info.Restore(Main.ServerSideCharacter, player);
 			}
 			foreach (TSPlayer plr in TShock.Players)
 			{
@@ -103,7 +103,7 @@ namespace InvSee
 		{
 			if ((e.Player == null) || !e.Player.Active || !e.Player.RealPlayer)
 			{ return; }
-			e.Player.GetPlayerInfo().Restore(e.Player);
+			e.Player.GetPlayerInfo().Restore(Main.ServerSideCharacter, e.Player);
 		}
 
 		#endregion

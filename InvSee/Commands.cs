@@ -16,17 +16,13 @@ namespace InvSee
 
         public static void DoInvSee(CommandArgs args)
         {
-            if (!Main.ServerSideCharacter)
-            {
-                args.Player.PluginErrorMessage("ServerSideCharacters must be enabled.");
-                return;
-            }
+            bool ssc = Main.ServerSideCharacter;
             PlayerInfo info = args.Player.GetPlayerInfo();
             #region Restore
 
             if (args.Parameters.Count < 1)
             {
-                Restore(args, info);
+                Restore(ssc, args, info);
                 return;
             }
 
@@ -36,26 +32,26 @@ namespace InvSee
             string _0 = args.Parameters[0].ToLower();
             if ((_0 == "-s") || (_0 == "-save"))
             {
-                Save(args, info);
+                Save(ssc, args, info);
                 return;
             }
 
             #endregion
-            Copy(args, info);
+            Copy(ssc, args, info);
         }
 
         #endregion
         #region Restore
 
-        private static void Restore(CommandArgs args, PlayerInfo info)
+        private static void Restore(bool ssc, CommandArgs args, PlayerInfo info)
         {
             if (args.Player.Dead)
             {
                 args.Player.PluginErrorMessage("You cannot restore your inventory while dead.");
                 return;
             }
-            if (info.Restore(args.Player))
-            { args.Player.PluginErrorMessage("Inventory has been restored."); }
+            if (info.Restore(ssc, args.Player))
+                args.Player.PluginErrorMessage("Inventory has been restored.");
             else
             {
                 args.Player.PluginInfoMessage("You are currently not seeing anyone's inventory.");
@@ -66,7 +62,7 @@ namespace InvSee
         #endregion
         #region Save
 
-        private static void Save(CommandArgs args, PlayerInfo info)
+        private static void Save(bool ssc, CommandArgs args, PlayerInfo info)
         {
             #region Checks
 
@@ -131,7 +127,17 @@ namespace InvSee
                     return;
                 }
                 args.Player.PlayerData.CopyCharacter(args.Player);
+                if (!ssc)
+                {
+                    Main.ServerSideCharacter = true;
+                    player.SendData(PacketTypes.WorldInfo);
+                }
                 args.Player.PlayerData.RestoreCharacter(player);
+                if (!ssc)
+                {
+                    Main.ServerSideCharacter = false;
+                    player.SendData(PacketTypes.WorldInfo);
+                }
                 TShock.Log.ConsoleInfo($"[Player change] {args.Player.Name} " +
                     $"has modified {player.Name}'s inventory.");
                 args.Player.PluginInfoMessage($"Saved changes made to {player.Name}'s inventory.");
@@ -143,10 +149,10 @@ namespace InvSee
         #endregion
         #region Copy
 
-        private static void Copy(CommandArgs args, PlayerInfo info)
+        private static void Copy(bool ssc, CommandArgs args, PlayerInfo info)
         {
             if (args.Player.PlayerData == null)
-            { args.Player.PlayerData = new PlayerData(args.Player); }
+                args.Player.PlayerData = new PlayerData(args.Player);
 
             string name = string.Join(" ", args.Parameters);
             PlayerData data;
@@ -187,7 +193,7 @@ namespace InvSee
             else
             {
                 if (players[0].PlayerData == null)
-                { players[0].PlayerData = new PlayerData(players[0]); }
+                    players[0].PlayerData = new PlayerData(players[0]);
                 players[0].PlayerData.CopyCharacter(players[0]);
                 data = players[0].PlayerData;
                 playerIndex = players[0].Index;
@@ -214,13 +220,23 @@ namespace InvSee
                 
                 info.CopyingUserID = userID;
                 info.CopyingPlayerIndex = playerIndex;
+                if (!ssc)
+                {
+                    Main.ServerSideCharacter = true;
+                    args.Player.SendData(PacketTypes.WorldInfo);
+                }
                 data.RestoreCharacter(args.Player);
+                if (!ssc)
+                {
+                    Main.ServerSideCharacter = false;
+                    args.Player.SendData(PacketTypes.WorldInfo);
+                }
                 args.Player.PluginSuccessMessage($"Copied {name}'s inventory.");
             }
             catch (Exception ex)
             {
                 // In case it fails, everything is restored
-                info.Restore(args.Player);
+                info.Restore(ssc, args.Player);
                 TShock.Log.ConsoleError(ex.ToString());
                 args.Player.PluginErrorMessage("Something went wrong... restored your inventory.");
             }
