@@ -83,7 +83,7 @@ namespace InvSee
 
             if (info.CopyingUserID != -1)
             {
-                User user = TShock.Users.GetUserByID(info.CopyingUserID);
+                UserAccount user = TShock.UserAccounts.GetUserAccountByID(info.CopyingUserID);
                 if (user == null)
                 {
                     args.Player.PluginErrorMessage("Invalid user!");
@@ -157,7 +157,7 @@ namespace InvSee
             string name = string.Join(" ", args.Parameters);
             PlayerData data;
             int userID = -1, playerIndex = -1;
-            List<TSPlayer> players = TShock.Utils.FindPlayer(name);
+            List<TSPlayer> players = TSPlayer.FindByNameOrID(name);
             #region User
 
             if (players.Count == 0)
@@ -168,7 +168,7 @@ namespace InvSee
                     return;
                 }
 
-                User user = TShock.Users.GetUserByName(name);
+                UserAccount user = TShock.UserAccounts.GetUserAccountByName(name);
                 if (user == null)
                 {
                     args.Player.PluginErrorMessage($"Invalid player or account '{name}'!");
@@ -187,7 +187,7 @@ namespace InvSee
 
             else if (players.Count > 1)
             {
-                TShock.Utils.SendMultipleMatchError(args.Player, players.Select(p => p.Name));
+                args.Player.SendMultipleMatchError(players.Select(p => p.Name));
                 return;
             }
             else
