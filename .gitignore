@@ -20,6 +20,7 @@ InvSee/bin/Mysql.Data.dll
 x64/
 build/
 [Oo]bj/
+bin/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
