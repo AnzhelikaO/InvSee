@@ -5,9 +5,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="TShock" Version="6.0.0" />
-    <PackageReference Include="TSAPI" Version="6.0.0" />
-    <PackageReference Include="OTAPI.Upcoming" Version="3.3.10" />
+    <PackageReference Include="TShock" Version="6.2.1" />
+    <PackageReference Include="TSAPI" Version="6.2.1" />
+    <PackageReference Include="OTAPI.Upcoming" Version="3.3.14" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
